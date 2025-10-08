@@ -13,14 +13,15 @@ export const getAllCountries = async (req: Request, res: Response) => {
 
 export const getCountryByName = async (req: Request, res: Response) => {
   const { name } = req.params;
-  console.log(name)
+
   const response = await fetch(`${BASE_URL}name/${name}`);
   const data = await response.json();
   res.json(data);
 };
 
 export const getCountiesByCode = async (req: Request, res: Response) => {
-  const { codes } = req.params;
+  const { codes } = req.query;
+
   const response = await fetch(`${BASE_URL}alpha?codes=${codes}`);
   const data = await response.json();
   res.json(data);
