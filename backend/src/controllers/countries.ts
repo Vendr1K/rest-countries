@@ -1,4 +1,6 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { transformCountry } from '../converters';
+import { NotFoundError } from '../errors';
 
 const BASE_URL = 'https://restcountries.com/v2/';
 
@@ -11,12 +13,23 @@ export const getAllCountries = async (req: Request, res: Response) => {
   res.json(data);
 };
 
-export const getCountryByName = async (req: Request, res: Response) => {
+export const getCountryByName = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const { name } = req.params;
 
   const response = await fetch(`${BASE_URL}name/${name}`);
   const data = await response.json();
-  res.json(data);
+
+  const country = data[0];
+
+  if (!country) return next(new NotFoundError('Country Not Found'));
+
+  const preparedCountry = transformCountry(country);
+
+  res.json(preparedCountry);
 };
 
 export const getCountiesByCode = async (req: Request, res: Response) => {
