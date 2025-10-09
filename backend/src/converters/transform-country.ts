@@ -1,6 +1,47 @@
-import { extractNames } from '../helpers';
+type NativeName = {
+  [langCode: string]: {
+    common: string;
+    official: string;
+  };
+};
+
+type Currencies = {
+  [currency: string]: {
+    name: string;
+    symbol: string;
+  };
+};
+
+export type Neighbors = {
+  common: string;
+  official: string;
+  nativeName: NativeName;
+};
 
 type CountryFields = {
+  name: {
+    common: string;
+    official: string;
+    nativeName: NativeName;
+  };
+  flags: {
+    png: string;
+    svg: string;
+    alt: string;
+  };
+  capital: string[];
+  population: number;
+  region: string;
+  subregion: string;
+  tld: string[];
+  currencies: Currencies;
+  languages: {
+    [langCode: string]: string;
+  };
+  borders: string[];
+};
+
+type MappedCountry = {
   name: string;
   nativeName: string;
   flag: string;
@@ -9,56 +50,39 @@ type CountryFields = {
   region: string;
   subregion: string;
   topLevelDomain: string[];
-  currencies: {
-    code: string;
-    name: string;
-    symbol: string;
-  }[];
-  languages: {
-    iso639_1?: string;
-    iso639_2?: string;
-    name: string;
-    nativeName?: string;
-  }[];
+  currencies: string[];
+  languages: string[];
   borders: string[];
-  neighbors?: string[];
+  neighbors: string[];
 };
 
-function isCountryFields(obj: any): obj is CountryFields {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    typeof obj.name === 'string' &&
-    typeof obj.nativeName === 'string' &&
-    typeof obj.flag === 'string' &&
-    typeof obj.capital === 'string' &&
-    typeof obj.population === 'number' &&
-    typeof obj.region === 'string' &&
-    typeof obj.subregion === 'string' &&
-    Array.isArray(obj.topLevelDomain) &&
-    Array.isArray(obj.currencies) &&
-    Array.isArray(obj.languages) &&
-    Array.isArray(obj.borders) &&
-    (obj.neighbors === undefined || Array.isArray(obj.neighbors))
-  );
-}
+const extractNativeNames = (nativeNameObj: NativeName): string => {
+  return Object.values(nativeNameObj)
+    .map((name) => name.common)
+    .join(', ');
+};
 
-export const transformCountry = (country: unknown) => {
-  if (!isCountryFields(country)) {
-    throw new Error('Invalid country object');
-  }
+const extractCurrencies = (currencies: Currencies): string[] => {
+  return Object.values(currencies).map((currency) => currency.name);
+};
+
+const extractValues = (obj: { [key: string]: string }): string[] => {
+  return Object.values(obj);
+};
+
+export const transformCountry = (country: CountryFields): MappedCountry => {
   return {
-    name: country.name,
-    nativeName: country.nativeName,
-    flag: country.flag,
-    capital: country.capital,
+    name: country.name.common,
+    nativeName: extractNativeNames(country.name.nativeName),
+    flag: country.flags.svg,
+    capital: country.capital[0],
     population: country.population,
     region: country.region,
     subregion: country.subregion,
-    topLevelDomain: country.topLevelDomain,
-    currencies: extractNames(country.currencies),
-    languages: extractNames(country.languages),
+    topLevelDomain: country.tld,
+    currencies: extractCurrencies(country.currencies),
+    languages: extractValues(country.languages),
     borders: country.borders,
-    neighbors: country.neighbors || [],
+    neighbors: [],
   };
 };
