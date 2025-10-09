@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
-import { transformCountry } from '../converters';
+import { transformAllCountries, transformCountry } from '../converters';
 import { NotFoundError } from '../errors';
-import { ALL_COUNTRIES, BASE_URL } from '../constants';
+import { ALL_COUNTRIES, BASE_URL_V2 } from '../constants';
 import { extractNames } from '../helpers';
 
 export const getAllCountries = async (req: Request, res: Response) => {
   const response = await fetch(ALL_COUNTRIES);
   const data = await response.json();
-  res.json(data);
+
+  res.json(transformAllCountries(data));
 };
 
 export const getCountryByName = async (
@@ -17,7 +18,7 @@ export const getCountryByName = async (
 ) => {
   const { name } = req.params;
 
-  const response = await fetch(`${BASE_URL}name/${name}`);
+  const response = await fetch(`${BASE_URL_V2}name/${name}`);
   const data = await response.json();
 
   const country = data[0];
@@ -40,13 +41,13 @@ export const getCountryByName = async (
 export const getCountiesByCode = async (req: Request, res: Response) => {
   const { codes } = req.query;
 
-  const response = await fetch(`${BASE_URL}alpha?codes=${codes}`);
+  const response = await fetch(`${BASE_URL_V2}alpha?codes=${codes}`);
   const data = await response.json();
   res.json(data);
 };
 
 export const getNeighbors = async (codes: string): Promise<string[]> => {
-  const response = await fetch(`${BASE_URL}alpha?codes=${codes}`);
+  const response = await fetch(`${BASE_URL_V2}alpha?codes=${codes}`);
   const data = await response.json();
   return extractNames(data);
 };
