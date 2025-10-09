@@ -21,6 +21,7 @@ type CountryFields = {
     nativeName?: string;
   }[];
   borders: string[];
+  neighbors?: string[];
 };
 
 function isCountryFields(obj: any): obj is CountryFields {
@@ -37,7 +38,8 @@ function isCountryFields(obj: any): obj is CountryFields {
     Array.isArray(obj.topLevelDomain) &&
     Array.isArray(obj.currencies) &&
     Array.isArray(obj.languages) &&
-    Array.isArray(obj.borders)
+    Array.isArray(obj.borders) &&
+    (obj.neighbors === undefined || Array.isArray(obj.neighbors))
   );
 }
 
@@ -57,5 +59,6 @@ export const transformCountry = (country: unknown) => {
     currencies: extractNames(country.currencies),
     languages: extractNames(country.languages),
     borders: country.borders,
+    neighbors: country.neighbors || [],
   };
 };

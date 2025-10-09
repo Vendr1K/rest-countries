@@ -1,11 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { transformCountry } from '../converters';
 import { NotFoundError } from '../errors';
-
-const BASE_URL = 'https://restcountries.com/v2/';
-
-const ALL_COUNTRIES =
-  BASE_URL + 'all?fields=name,capital,flags,population,region';
+import { ALL_COUNTRIES, BASE_URL } from '../constants';
+import { extractNames } from '../helpers';
 
 export const getAllCountries = async (req: Request, res: Response) => {
   const response = await fetch(ALL_COUNTRIES);
@@ -29,6 +26,14 @@ export const getCountryByName = async (
 
   const preparedCountry = transformCountry(country);
 
+  let neighbors: string[] = [];
+
+  if (preparedCountry.borders.length !== 0) {
+    neighbors = await getNeighbors(preparedCountry.borders.join(','));
+  }
+
+  preparedCountry.neighbors = neighbors;
+
   res.json(preparedCountry);
 };
 
@@ -38,4 +43,10 @@ export const getCountiesByCode = async (req: Request, res: Response) => {
   const response = await fetch(`${BASE_URL}alpha?codes=${codes}`);
   const data = await response.json();
   res.json(data);
+};
+
+export const getNeighbors = async (codes: string): Promise<string[]> => {
+  const response = await fetch(`${BASE_URL}alpha?codes=${codes}`);
+  const data = await response.json();
+  return extractNames(data);
 };
