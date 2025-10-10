@@ -19,6 +19,6 @@ const extractNeighbors = (neighborsObj: NativeName[]) => {
 export const getNeighbors = async (codes: string): Promise<string[]> => {
   const response = await fetch(`${BASE_URL}alpha?codes=${codes}`);
   const data = await response.json();
-  console.log(extractNeighbors(data));
+  
   return extractNeighbors(data);
 };
